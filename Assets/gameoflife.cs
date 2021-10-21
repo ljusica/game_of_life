@@ -14,7 +14,7 @@ public class GameOfLife : ProcessingLite.GP21
     {
         //Lower framerate makes it easier to test and see whats happening.
         QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 4;
+        Application.targetFrameRate = 10;
 
         //Calculate our grid depending on size and cellSize
         numberOfColums = (int)Mathf.Floor(Width / cellSize);
@@ -46,11 +46,11 @@ public class GameOfLife : ProcessingLite.GP21
     void Update()
     {
         //Clear screen
-        Background(0);
+        Background(255);
 
-        for (int y = 1; y < numberOfRows-1; ++y)
+        for (int y = 1; y < numberOfRows - 1; ++y)
         {
-            for (int x = 1; x < numberOfColums-1; ++x)
+            for (int x = 1; x < numberOfColums - 1; ++x)
             {
                 cells[x, y].previousGen = CalculateNeighbours(x, y);
             }
@@ -62,12 +62,19 @@ public class GameOfLife : ProcessingLite.GP21
             {
                 if (cells[x, y].previousGen < 2 || cells[x, y].previousGen > 3)
                 {
+                    if (cells[x, y].alive)
+                    {
+                        cells[x, y].fade = true;
+                    }
+
                     cells[x, y].alive = false;
                 }
 
                 if (cells[x, y].alive == false && cells[x, y].previousGen == 3)
                 {
                     cells[x, y].alive = true;
+                    cells[x, y].fade = false;
+                    cells[x, y].alpha = 255;
                 }
             }
         }
@@ -137,9 +144,9 @@ public class GameCell : ProcessingLite.GP21
     float x, y; //Keep track of our position
     float size; //our size
     public int previousGen;
-
-    //Keep track if we are alive
+    public bool fade = false;
     public bool alive = false;
+    public int alpha = 255;
 
     //Constructor
     public GameCell(float x, float y, float size)
@@ -159,9 +166,23 @@ public class GameCell : ProcessingLite.GP21
         //If we are alive, draw our dot.
         if (alive)
         {
-            //draw our dots
+            Fill(0);
+            Stroke(0);
             Circle(x, y, size);
-            //new Vector existing = [this.x, this.y]
+        }
+
+        if (fade)
+        {
+            Fill(238, 155, 250, alpha);
+            Stroke(238, 155, 250, alpha);
+            Circle(x, y, size);
+
+            alpha = alpha - 20;
+          
+            if (alpha <= 0)
+            {
+                alpha = 0;
+            }
         }
     }
 }
